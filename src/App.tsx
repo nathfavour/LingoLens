@@ -1,15 +1,18 @@
 import { useState, useCallback } from 'react';
-import { Mic2, History, AlertCircle, RefreshCcw } from 'lucide-react';
+import { Mic2, History, AlertCircle, RefreshCcw, Upload, Mic } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { AudioUploaderContent } from './components/AudioUploader';
+import { AudioRecorder } from './components/AudioRecorder';
 import { AnalysisDisplay } from './components/AnalysisDisplay';
 import { analyzeAccent, AccentAnalysis } from './services/geminiService';
+import { cn } from './lib/utils';
 
 export default function App() {
   const [file, setFile] = useState<File | null>(null);
   const [analysis, setAnalysis] = useState<AccentAnalysis | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mode, setMode] = useState<'upload' | 'record'>('upload');
 
   const handleFileSelect = useCallback(async (selectedFile: File) => {
     setFile(selectedFile);
@@ -81,13 +84,43 @@ export default function App() {
           <AnimatePresence mode="wait">
             {!analysis && !isLoading && !error && (
               <motion.div
-                key="uploader"
+                key="input-selection"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className="py-8"
+                className="py-8 space-y-8"
               >
-                <AudioUploaderContent onFileSelect={handleFileSelect} isLoading={isLoading} />
+                {/* Mode Selector */}
+                <div className="flex justify-center">
+                  <div className="bg-white/5 p-1 rounded-2xl border border-white/10 flex gap-1">
+                    <button
+                      onClick={() => setMode('upload')}
+                      className={cn(
+                        "px-6 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2",
+                        mode === 'upload' ? "bg-primary text-black shadow-lg" : "text-muted-foreground hover:text-white"
+                      )}
+                    >
+                      <Upload className="w-4 h-4" />
+                      Upload File
+                    </button>
+                    <button
+                      onClick={() => setMode('record')}
+                      className={cn(
+                        "px-6 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2",
+                        mode === 'record' ? "bg-primary text-black shadow-lg" : "text-muted-foreground hover:text-white"
+                      )}
+                    >
+                      <Mic className="w-4 h-4" />
+                      Record Live
+                    </button>
+                  </div>
+                </div>
+
+                {mode === 'upload' ? (
+                  <AudioUploaderContent onFileSelect={handleFileSelect} isLoading={isLoading} />
+                ) : (
+                  <AudioRecorder onRecordingComplete={handleFileSelect} isLoading={isLoading} />
+                )}
               </motion.div>
             )}
 
