@@ -1,7 +1,14 @@
 import React, { useCallback, useState } from 'react';
+import { 
+  Box, 
+  Paper, 
+  Typography, 
+  IconButton, 
+  LinearProgress,
+  useTheme
+} from '@mui/material';
 import { Upload, FileAudio, X, Mic } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { cn } from '../lib/utils';
 
 interface AudioUploaderProps {
   onFileSelect: (file: File) => void;
@@ -9,6 +16,7 @@ interface AudioUploaderProps {
 }
 
 export const AudioUploaderContent: React.FC<AudioUploaderProps> = ({ onFileSelect, isLoading }) => {
+  const theme = useTheme();
   const [isDragging, setIsDragging] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
@@ -45,23 +53,39 @@ export const AudioUploaderContent: React.FC<AudioUploaderProps> = ({ onFileSelec
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
-      <div
+    <Box sx={{ width: '100%', maxWidth: 700, mx: 'auto' }}>
+      <Paper
+        elevation={0}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        className={cn(
-          "relative group cursor-pointer transition-all duration-300",
-          "border-2 border-dashed rounded-3xl p-12 text-center",
-          isDragging ? "border-primary bg-primary/5 scale-[1.02]" : "border-muted-foreground/20 hover:border-primary/50",
-          "bg-card/30 backdrop-blur-sm shadow-xl"
-        )}
+        sx={{
+          position: 'relative',
+          borderRadius: 8,
+          p: 6,
+          textAlign: 'center',
+          bgcolor: isDragging ? 'rgba(255,179,0,0.05)' : '#161412',
+          border: '2px dashed',
+          borderColor: isDragging ? 'primary.main' : '#1C1A18',
+          transition: 'all 0.3s ease',
+          '&:hover': {
+            borderColor: 'primary.main',
+            cursor: isLoading ? 'default' : 'pointer'
+          }
+        }}
       >
         <input
           type="file"
           accept="audio/*"
           onChange={handleFileInput}
-          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            opacity: 0,
+            cursor: isLoading ? 'default' : 'pointer'
+          }}
           disabled={isLoading}
         />
         
@@ -69,68 +93,95 @@ export const AudioUploaderContent: React.FC<AudioUploaderProps> = ({ onFileSelec
           {!selectedFile ? (
             <motion.div
               key="empty"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="flex flex-col items-center gap-4"
             >
-              <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                <Upload className="w-10 h-10 text-primary" />
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-2xl font-semibold tracking-tight">Drop your audio here</h3>
-                <p className="text-muted-foreground">Supports M4A, MP3, WAV, and more</p>
-              </div>
-              <div className="mt-4 flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-muted-foreground">
-                <Mic className="w-3 h-3" />
-                <span>Highest Accuracy Processing</span>
-              </div>
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+                <Box sx={{ 
+                  width: 80, 
+                  height: 80, 
+                  borderRadius: '50%', 
+                  bgcolor: 'rgba(255,179,0,0.1)', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  color: 'primary.main'
+                }}>
+                  <Upload size={32} />
+                </Box>
+                <Box>
+                  <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>Drop audio sample here</Typography>
+                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>High-fidelity processing for M4A, WAV, MP3</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, opacity: 0.5 }}>
+                  <Mic size={12} />
+                  <Typography variant="caption" sx={{ textTransform: 'uppercase', letterSpacing: 2, fontWeight: 700 }}>Neural Processing Enabled</Typography>
+                </Box>
+              </Box>
             </motion.div>
           ) : (
             <motion.div
               key="selected"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="flex flex-col items-center gap-6"
             >
-              <div className="relative">
-                <div className="w-24 h-24 rounded-2xl bg-primary/20 flex items-center justify-center">
-                  <FileAudio className="w-12 h-12 text-primary" />
-                </div>
-                {!isLoading && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      clearFile();
-                    }}
-                    className="absolute -top-2 -right-2 p-1.5 rounded-full bg-destructive text-destructive-foreground shadow-lg hover:scale-110 transition-transform"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-              
-              <div className="space-y-1">
-                <h3 className="text-xl font-medium truncate max-w-[300px]">{selectedFile.name}</h3>
-                <p className="text-sm text-muted-foreground">
-                  {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB • Ready for analysis
-                </p>
-              </div>
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                <Box sx={{ position: 'relative' }}>
+                  <Box sx={{ 
+                    width: 100, 
+                    height: 100, 
+                    borderRadius: 4, 
+                    bgcolor: 'rgba(255,179,0,0.1)', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    color: 'primary.main',
+                    border: '1px solid',
+                    borderColor: 'primary.main'
+                  }}>
+                    <FileAudio size={48} />
+                  </Box>
+                  {!isLoading && (
+                    <IconButton
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        clearFile();
+                      }}
+                      sx={{
+                        position: 'absolute',
+                        top: -12,
+                        right: -12,
+                        bgcolor: 'error.main',
+                        color: 'white',
+                        '&:hover': { bgcolor: '#d32f2f' }
+                      }}
+                    >
+                      <X size={16} />
+                    </IconButton>
+                  )}
+                </Box>
+                
+                <Box>
+                  <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5, maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {selectedFile.name}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                    {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB • Ready for analysis
+                  </Typography>
+                </Box>
 
-              {isLoading && (
-                <div className="w-full max-w-xs h-1.5 bg-muted rounded-full overflow-hidden">
-                  <motion.div
-                    initial={{ x: '-100%' }}
-                    animate={{ x: '100%' }}
-                    transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
-                    className="w-full h-full bg-primary"
+                {isLoading && (
+                  <LinearProgress 
+                    sx={{ width: '100%', maxWidth: 200, borderRadius: 10, height: 4 }} 
                   />
-                </div>
-              )}
+                )}
+              </Box>
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
-    </div>
+      </Paper>
+    </Box>
   );
 };

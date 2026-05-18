@@ -2,5 +2,5 @@
   "name": "LingoLens: Accent & Dialect AI",
   "description": "Powerful AI-driven accent detection and dialect analysis for audio recordings using Gemini.",
   "requestFramePermissions": ["microphone"],
-  "majorCapabilities": []
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

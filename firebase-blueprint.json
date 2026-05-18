@@ -1,0 +1,40 @@
+{
+  "entities": {
+    "userProfile": {
+      "title": "User Profile",
+      "description": "Public and private information for a user",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "createdAt"]
+    },
+    "trainingProgress": {
+      "title": "Training Progress",
+      "description": "User's progress in a specific accent training",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "accentId": { "type": "string" },
+        "level": { "type": "number" },
+        "score": { "type": "number" },
+        "lastUpdated": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "accentId", "level", "score", "lastUpdated"]
+    }
+  },
+  "firestore": {
+    "/users/{uid}": {
+      "schema": "userProfile",
+      "description": "Main user document"
+    },
+    "/users/{uid}/progress/{accentId}": {
+      "schema": "trainingProgress",
+      "description": "Tracks progress for specific accents"
+    }
+  }
+}
